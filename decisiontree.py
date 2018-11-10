@@ -6,18 +6,19 @@ import argparse
 import graphviz
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-d", "--dataset", required=True)
+ap.add_argument("-train", "--trainingdataset", required=True)
+ap.add_argument("-test", "--testingdataset")
 ap.add_argument("-attri", "--attributes", type=str, required=True)
 ap.add_argument("-cat", "--category", type=str)
 ap.add_argument("-c", "--class", type=int, required=True)
 args = vars(ap.parse_args())
 le = preprocessing.LabelEncoder()
 
-balance_data = pd.read_csv(args['dataset'], sep=',')
+balance_data = pd.read_csv(args['trainingdataset'], sep=',')
 
 X = balance_data.values[:, int(args['attributes'].split(':')[0]):int(args['attributes'].split(':')[1])]
 Y = balance_data.values[:, args['class']]
-Y = Y.astype('int')
+# Y = Y.astype('int')
 
 if args['category']:
     for i in range(int(args['category'].split(':')[0]), int(args['category'].split(':')[1])):
@@ -25,7 +26,14 @@ if args['category']:
         le.fit(list(set(X[:, i - col])))
         X[:, i - col] = le.transform(X[:, i - col])
 
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=100)
+if args['testingdataset']:
+    testing_data = pd.read_csv(args['testingdataset'], sep=',')
+    X_test = testing_data.values[:, int(args['attributes'].split(':')[0]):int(args['attributes'].split(':')[1])]
+    y_test = testing_data.values[:, args['class']]
+    X_train = X
+    y_train = Y
+else:
+    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=100)
 clf = tree.DecisionTreeClassifier(random_state=10)
 clf.fit(X_train, y_train)
 dot_data = tree.export_graphviz(clf, out_file=None)
