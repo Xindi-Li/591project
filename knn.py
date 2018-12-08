@@ -1,10 +1,9 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn import tree
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn import preprocessing
 import argparse
-import graphviz
+import numpy as np
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-train", "--trainingdataset", required=True)
@@ -37,5 +36,7 @@ else:
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.3, random_state=100)
 clf = KNeighborsClassifier(n_neighbors=3)
 clf.fit(X_train, y_train)
-acc = clf.score(X_test, y_test)
-print("accuracy: " + str(acc))
+X_pre = np.array([1] * 18).reshape(1, 18)
+print(clf.predict(X_pre))
+print(clf.kneighbors(X_pre, n_neighbors=3))
+print(y_train[835], y_train[383], y_train[829])
